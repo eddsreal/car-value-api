@@ -21,6 +21,7 @@ import {
   UpdateUserDto,
   UserDto,
 } from './users.dtos';
+import { User } from './users.entity';
 import { UsersService } from './users.service';
 
 @Controller('auth')
@@ -38,7 +39,7 @@ export class UsersController {
   // }
 
   @Get('/whoami')
-  whoAmI(@CurrentUser() user: any) {
+  whoAmI(@CurrentUser() user: User) {
     return user;
   }
 
