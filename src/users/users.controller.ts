@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Session,
 } from '@nestjs/common';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { AuthService } from './auth.service';
@@ -26,14 +27,28 @@ export class UsersController {
     private usersService: UsersService,
     private authService: AuthService,
   ) {}
+  @Get('/whoami')
+  whoAmI(@Session() session: any) {
+    return this.usersService.findOne(session.userId);
+  }
+
   @Post('/signup')
-  signup(@Body() args: CreateUserDto) {
-    return this.authService.signup(args);
+  async signup(@Body() args: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signup(args);
+    session.userId = user.id;
+    return user;
   }
 
   @Post('/signin')
-  signin(@Body() args: SignUserDto) {
-    return this.authService.signin(args);
+  async signin(@Body() args: SignUserDto, @Session() session: any) {
+    const user = await this.authService.signin(args);
+    session.userId = user.id;
+    return user;
+  }
+
+  @Post('/signout')
+  signOut(@Session() session: any) {
+    session.userId = null;
   }
 
   @Get('/:id')
