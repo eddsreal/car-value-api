@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './users.dtos';
@@ -6,10 +7,11 @@ import { UsersService } from './users.service';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let fakeUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
     //  create a fake property of the users service
-    const fakeUsersService: Partial<UsersService> = {
+    fakeUsersService = {
       find: () => Promise.resolve([]),
       create: ({ email, password }: CreateUserDto) =>
         Promise.resolve({ id: 1, email, password } as User),
@@ -42,6 +44,18 @@ describe('AuthService', () => {
     const [salt, hash] = user.password.split('.');
     expect(salt).toBeDefined();
     expect(hash).toBeDefined();
-    
+  });
+
+  it('It throws an error if user signs up with email that is in use', async () => {
+    fakeUsersService.find = () =>
+      Promise.resolve([
+        { id: 1, email: 'test@test.com', password: 'password' } as User,
+      ]);
+    try {
+      await service.signup({ email: 'test@test.com', password: 'password' });
+    } catch (err) {
+      expect(err).toBeInstanceOf(BadRequestException);
+      expect(err.message).toBe('Email in use');
+    }
   });
 });
