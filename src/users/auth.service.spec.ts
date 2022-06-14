@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './users.dtos';
@@ -8,13 +8,24 @@ import { UsersService } from './users.service';
 describe('AuthService', () => {
   let service: AuthService;
   let fakeUsersService: Partial<UsersService>;
+  const users: User[] = [];
 
   beforeEach(async () => {
     //  create a fake property of the users service
     fakeUsersService = {
-      find: () => Promise.resolve([]),
-      create: ({ email, password }: CreateUserDto) =>
-        Promise.resolve({ id: 1, email, password } as User),
+      find: (email: string) => {
+        const filteredUsers = users.filter((user) => user.email === email);
+        return Promise.resolve(filteredUsers);
+      },
+      create: ({ email, password }: CreateUserDto) => {
+        const user = {
+          id: Math.floor(Math.random() * 999999),
+          email,
+          password,
+        } as User;
+        users.push(user);
+        return Promise.resolve(user);
+      },
     };
 
     //  Testing Module
@@ -47,15 +58,41 @@ describe('AuthService', () => {
   });
 
   it('It throws an error if user signs up with email that is in use', async () => {
-    fakeUsersService.find = () =>
-      Promise.resolve([
-        { id: 1, email: 'test@test.com', password: 'password' } as User,
-      ]);
     try {
       await service.signup({ email: 'test@test.com', password: 'password' });
     } catch (err) {
       expect(err).toBeInstanceOf(BadRequestException);
       expect(err.message).toBe('Email in use');
     }
+  });
+
+  it('It throws an error if user does not exists', async () => {
+    try {
+      await service.signin({
+        email: 'test@tests.com',
+        password: 'password',
+      });
+    } catch (err) {
+      expect(err).toBeInstanceOf(NotFoundException);
+      expect(err.message).toBe('User Not found');
+    }
+  });
+
+  it('It throws an error if invalid password is provided', async () => {
+    try {
+      await service.signin({ email: 'test@test.com', password: 'passwords' });
+    } catch (err) {
+      console.log(err);
+      expect(err).toBeInstanceOf(BadRequestException);
+      expect(err.message).toBe('Bad Password');
+    }
+  });
+
+  it('It returns a user if correct password is provided', async () => {
+    const user = await service.signin({
+      email: 'test@test.com',
+      password: 'asdawda',
+    });
+    expect(user).toBeDefined();
   });
 });
