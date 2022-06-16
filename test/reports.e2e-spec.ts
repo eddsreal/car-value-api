@@ -40,6 +40,7 @@ describe('Reports (e2e)', () => {
       .expect(201);
 
     expect(body.model).toEqual(report.model);
+    expect(body.userId).toEqual(1);
   });
 
   it('Throws an error for unauthorized requests', async () => {

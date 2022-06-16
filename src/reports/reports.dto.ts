@@ -1,3 +1,4 @@
+import { Expose, Transform } from 'class-transformer';
 import {
   IsLatitude,
   IsLongitude,
@@ -6,6 +7,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { User } from 'src/users/users.entity';
 
 export class CreateReportDto {
   @IsNumber()
@@ -33,4 +35,36 @@ export class CreateReportDto {
   @Min(0)
   @Max(1000000)
   mileage: number;
+
+  user: User;
+}
+
+export class ReportDto {
+  @Expose()
+  id: number;
+
+  @Expose()
+  price: number;
+
+  @Expose()
+  make: string;
+
+  @Expose()
+  model: string;
+
+  @Expose()
+  year: number;
+
+  @Expose()
+  lng: number;
+
+  @Expose()
+  lat: number;
+
+  @Expose()
+  mileage: number;
+
+  @Transform(({ obj }) => obj.user.id)
+  @Expose()
+  userId: number;
 }
