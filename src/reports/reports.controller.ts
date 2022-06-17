@@ -12,6 +12,7 @@ import { AuthGuard } from '../guards/auth.guard';
 import { ApproveReportDto, CreateReportDto, ReportDto } from './reports.dto';
 import { ReportsService } from './reports.service';
 import { Serialize } from '../interceptors/serialize.interceptor';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('reports')
 export class ReportsController {
@@ -25,6 +26,7 @@ export class ReportsController {
   }
 
   @Patch(':id')
+  @UseGuards(AdminGuard)
   approveReport(@Param('id') id: number, @Body() args: ApproveReportDto) {
     return this.reportsService.changeApproval(id, args);
   }
