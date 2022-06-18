@@ -4,6 +4,8 @@ export class DatabaseConfiguration implements TypeOrmOptionsFactory {
   createTypeOrmOptions(): TypeOrmModuleOptions | Promise<TypeOrmModuleOptions> {
     const dbConfig: TypeOrmModuleOptions = {
       synchronize: false,
+      migrations: ['migrations/*.ts'],
+      migrationsTableName: 'migrations',
     };
     switch (process.env.NODE_ENV) {
       case 'development':
@@ -26,21 +28,5 @@ export class DatabaseConfiguration implements TypeOrmOptionsFactory {
         throw new Error('unknown environment');
     }
     return dbConfig;
-    // {
-    //   type: 'postgres',
-    //   host: process.env.POSTGRES_HOST,
-    //   port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
-    //   username: process.env.POSTGRES_USERNAME,
-    //   password: process.env.POSTGRES_PASSWORD,
-    //   database: process.env.POSTGRES_DATABASE,
-
-    //   entities: [process.env.TYPEORM_ENTITIES],
-    //   logging: true,
-    //   synchronize: false,
-    //   migrations: [process.env.TYPEORM_MIGRATIONS],
-    //   cli: {
-    //     migrationsDir: process.env.TYPEORM_MIGRATIONS_DIR,
-    //   },
-    // };
   }
 }

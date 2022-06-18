@@ -6,7 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
 import { APP_PIPE } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DatabaseConfiguration } from './database.configuration';
+import { DatabaseConfiguration } from './config/typeorm.config';
 const cookieSession = require('cookie-session');
 
 @Module({
